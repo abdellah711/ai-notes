@@ -8,6 +8,9 @@ dependencies:
   '@nextui-org/react':
     specifier: ^2.6.11
     version: 2.6.11(@types/react@19.0.5)(framer-motion@11.17.0)(react-dom@19.0.0)(react@19.0.0)(tailwindcss@3.4.17)
+  '@tanstack/react-query':
+    specifier: ^5.64.1
+    version: 5.64.1(react@19.0.0)
   better-auth:
     specifier: ^1.1.11
     version: 1.1.11
@@ -3479,6 +3482,19 @@ packages:
     resolution: {integrity: sha512-JQ5TuMi45Owi4/BIMAJBoSQoOJu12oOk/gADqlcUL9JEdHB8vyjUSsxqeNXnmXHjYKMi2WcYtezGEEhqUI/E2g==}
     dependencies:
       tslib: 2.8.1
+    dev: false
+
+  /@tanstack/query-core@5.64.1:
+    resolution: {integrity: sha512-978Wx4Wl4UJZbmvU/rkaM9cQtXXrbhK0lsz/UZhYIbyKYA8E4LdomTwyh2GHZ4oU0BKKoDH4YlKk2VscCUgNmg==}
+    dev: false
+
+  /@tanstack/react-query@5.64.1(react@19.0.0):
+    resolution: {integrity: sha512-vW5ggHpIO2Yjj44b4sB+Fd3cdnlMJppXRBJkEHvld6FXh3j5dwWJoQo7mGtKI2RbSFyiyu/PhGAy0+Vv5ev9Eg==}
+    peerDependencies:
+      react: ^18 || ^19
+    dependencies:
+      '@tanstack/query-core': 5.64.1
+      react: 19.0.0
     dev: false
 
   /@tanstack/react-virtual@3.11.2(react-dom@19.0.0)(react@19.0.0):
