@@ -45,7 +45,7 @@ export default function SignupPage() {
     },
     onSuccess: () => {
       startTransition(() => {
-        router.push("/");
+        router.push("/notes");
       });
     },
   });
