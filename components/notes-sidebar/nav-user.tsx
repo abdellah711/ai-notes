@@ -19,7 +19,9 @@ import {
 import { useRouter } from "@/hooks/use-router";
 import { authClient } from "@/lib/auth-client";
 import { Avatar } from "@nextui-org/avatar";
+import { Skeleton } from "@nextui-org/skeleton";
 import { useState } from "react";
+import { ThemeSwitcher } from "../theme-switcher";
 
 export function NavUser() {
   const { isMobile } = useSidebar();
@@ -44,10 +46,19 @@ export function NavUser() {
             <SidebarMenuButton size="lg">
               <Avatar name={data?.user.name.toUpperCase()} />
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-semibold capitalize">
-                  {data?.user.name}
-                </span>
-                <span className="truncate text-xs">{data?.user.email}</span>
+                {isPending ? (
+                  <>
+                    <Skeleton className="w-1/2 h-3" />
+                    <Skeleton className="w-full h-2.5 mt-1" />
+                  </>
+                ) : (
+                  <>
+                    <span className="truncate font-semibold capitalize">
+                      {data?.user.name}
+                    </span>
+                    <span className="truncate text-xs">{data?.user.email}</span>
+                  </>
+                )}
               </div>
               <ChevronsUpDown className="ml-auto size-4" />
             </SidebarMenuButton>
@@ -70,6 +81,7 @@ export function NavUser() {
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
+            <ThemeSwitcher />
             <DropdownMenuItem onClick={handleLogout}>
               <LogOut />
               {isLoggingOut || router.isNavigating
