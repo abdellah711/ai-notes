@@ -3,23 +3,27 @@
 import { PlusIcon, WandSparkles } from "lucide-react";
 import * as React from "react";
 
-import { NavMain } from "@/components/notes-sidebar/nav-main";
 import { NavUser } from "@/components/notes-sidebar/nav-user";
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
+  SidebarGroup,
+  SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { createNewNote } from "@/db/actions";
 import { Button } from "@nextui-org/react";
-import Link from "next/link";
+import { useMutation } from "@tanstack/react-query";
 
-export function NotesSidebar({
-  ...props
-}: React.ComponentProps<typeof Sidebar>) {
+type Props = React.ComponentProps<typeof Sidebar>;
+
+export function NotesSidebar({ children, ...props }: Props) {
+  const { isPending, mutate } = useMutation({ mutationFn: createNewNote });
+
   return (
     <Sidebar variant="inset" {...props}>
       <SidebarHeader>
@@ -42,15 +46,18 @@ export function NotesSidebar({
           size="sm"
           color="primary"
           className="self-end"
-          startContent={<PlusIcon className="size-4" />}
-          as={Link}
-          href="/notes/new"
+          startContent={!isPending && <PlusIcon className="size-4" />}
+          onPress={() => void mutate()}
+          isLoading={isPending}
         >
           New Note
         </Button>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain />
+        <SidebarGroup>
+          <SidebarGroupLabel>Notes</SidebarGroupLabel>
+          {children}
+        </SidebarGroup>
       </SidebarContent>
       <SidebarFooter>
         <NavUser />
