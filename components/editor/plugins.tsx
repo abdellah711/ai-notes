@@ -35,6 +35,9 @@ import {
   unwrapCodeBlock,
 } from "@udecode/plate-code-block";
 import { autoformatPlugin } from "./autoformat-plugin";
+import { INDENT_LIST_KEYS, ListStyleType } from "@udecode/plate-indent-list";
+import { HEADING_LEVELS } from "@udecode/plate-heading";
+import { TrailingBlockPlugin } from "@udecode/plate-trailing-block";
 
 export const basicNodesPlugins = [
   HeadingPlugin.configure({ options: { levels: 6 } }),
@@ -58,6 +61,17 @@ export const FloatingToolbarPlugin = createPlatePlugin({
   },
 });
 
+const resetBlockTypesCommonRule = {
+  defaultType: ParagraphPlugin.key,
+  types: [
+    ...HEADING_LEVELS,
+    BlockquotePlugin.key,
+    INDENT_LIST_KEYS.todo,
+    ListStyleType.Disc,
+    ListStyleType.Decimal,
+  ],
+};
+
 export const viewPlugins = [
   ...basicNodesPlugins,
   HorizontalRulePlugin,
@@ -68,6 +82,7 @@ export const viewPlugins = [
   ListPlugin,
   TodoListPlugin,
 ] as const;
+
 export const editorPlugins = [
   // Nodes
   ...viewPlugins,
@@ -77,6 +92,12 @@ export const editorPlugins = [
   ResetNodePlugin.configure({
     options: {
       rules: [
+        {
+          ...resetBlockTypesCommonRule,
+          hotkey: "Enter",
+          predicate: (editor) =>
+            editor.api.isEmpty(editor.selection, { block: true }),
+        },
         {
           ...resetBlockTypesCodeBlockRule,
           hotkey: "Enter",
@@ -90,6 +111,7 @@ export const editorPlugins = [
       ],
     },
   }),
+  TrailingBlockPlugin,
   NodeIdPlugin,
   // DndPlugin.configure({
   //   options: {

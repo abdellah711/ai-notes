@@ -41,6 +41,7 @@
     "@udecode/plate-reset-node": "^42.0.0",
     "@udecode/plate-slash-command": "^42.0.0",
     "@udecode/plate-toggle": "^42.0.0",
+    "@udecode/plate-trailing-block": "^42.0.0",
     "better-auth": "^1.1.11",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
