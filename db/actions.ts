@@ -7,6 +7,7 @@ import { db } from ".";
 import { noteTable } from "./schema/note";
 import { and, eq } from "drizzle-orm";
 import { cache } from "react";
+import { z } from "zod";
 
 const getSession = cache(async () => {
   const session = await auth.api.getSession({
@@ -60,4 +61,33 @@ export const getNote = async (noteId: string) => {
   }
 
   return note[0];
+};
+
+const UpdateNoteSchema = z.object({
+  noteId: z.number().int(),
+  title: z.string(),
+  content: z.array(z.any()),
+});
+
+export type UpdateNote = z.infer<typeof UpdateNoteSchema>;
+
+export const updateNote = async (data: UpdateNote) => {
+  const note = UpdateNoteSchema.parse(data);
+  const session = await getSession();
+
+  return await db
+    .update(noteTable)
+    .set({
+      title: note.title,
+      content: note.content,
+      updatedAt: new Date(),
+    })
+    .where(
+      and(
+        eq(noteTable.noteId, note.noteId),
+        eq(noteTable.userId, session.user.id)
+      )
+    )
+    .returning()
+    .then((res) => res[0]);
 };
