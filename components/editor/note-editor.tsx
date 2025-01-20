@@ -12,6 +12,7 @@ import { updateNote } from "@/db/actions";
 import { formatRelative } from "date-fns";
 import { SidebarTrigger } from "../ui/sidebar";
 import { useNotesStore } from "@/stores/notes";
+import NoteDropdownMenu from "../note-dropdown-menu";
 
 type Props = {
   note: Note;
@@ -60,8 +61,9 @@ export function NoteEditor({ note: initialNote }: Props) {
   return (
     <>
       <header className="flex pt-4 shrink-0 items-center gap-2">
-        <div className="flex items-center gap-2 px-4">
+        <div className="flex items-center gap-2 px-4 justify-between w-full">
           <SidebarTrigger className="-ml-1" />
+          <NoteDropdownMenu />
         </div>
       </header>
       <div className="size-full px-12 pb-24 pt-4 text-base sm:px-[max(30px,calc(50%-350px))]">
