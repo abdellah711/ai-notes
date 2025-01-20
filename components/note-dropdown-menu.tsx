@@ -1,3 +1,4 @@
+"use client";
 import { deleteNote } from "@/db/actions";
 import { useRouter } from "@/hooks/use-router";
 import { useNotesStore } from "@/stores/notes";
@@ -28,6 +29,7 @@ export default function NoteDropdownMenu({ noteId: defaultNoteId }: Props) {
   const params = useParams();
   const noteId = defaultNoteId ?? Number(params.noteId);
   const deleteNoteStore = useNotesStore((state) => state.deleteNote);
+  const notes = useNotesStore((state) => state.notes);
   const { isPending, mutate } = useMutation({
     mutationFn: deleteNote,
     onSuccess: () => {
@@ -35,6 +37,9 @@ export default function NoteDropdownMenu({ noteId: defaultNoteId }: Props) {
       router.push("/notes");
     },
   });
+
+  if (!noteId || !notes.find((n) => n.noteId === noteId)) return null;
+
   return (
     <>
       <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
