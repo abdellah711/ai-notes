@@ -30,7 +30,7 @@ export function NavNotes({}: Props) {
             isActive={item.noteId === Number(noteId)}
           >
             <Link href={`/notes/${item.noteId}`}>
-              <span className="text-medium">{"🔥"}</span>
+              <span className="text-medium">{item.emoji}</span>
               <span>{item.title || "Untitled"}</span>
             </Link>
           </SidebarMenuButton>

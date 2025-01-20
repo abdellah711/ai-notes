@@ -8,6 +8,7 @@ export const noteTable = pgTable("notes", {
     .notNull()
     .references(() => user.id, { onDelete: "cascade" }),
   title: text("title").default(""),
+  emoji: text("emoji").default("📄"),
   content: jsonb("content").default("[]"),
   ...timestamps,
 });

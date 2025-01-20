@@ -11,6 +11,7 @@ import { useMutation } from "@tanstack/react-query";
 import { formatRelative } from "date-fns";
 import isEqual from "lodash-es/isEqual";
 import { useEffect, useRef, useState } from "react";
+import EmojiPicker from "../emoji-picker";
 
 type Props = {
   note: Note;
@@ -40,7 +41,9 @@ export function NoteEditor({ note: initialNote }: Props) {
   };
 
   const isTheSameNote =
-    note.title === savedNote.title && isEqual(note.content, savedNote.content);
+    note.title === savedNote.title &&
+    isEqual(note.content, savedNote.content) &&
+    note.emoji === savedNote.emoji;
 
   useEffect(() => {
     if (isTheSameNote) {
@@ -51,23 +54,33 @@ export function NoteEditor({ note: initialNote }: Props) {
         noteId: note.noteId,
         title: note.title ?? "",
         content: editor.children,
+        emoji: note.emoji ?? undefined,
       });
     }, SAVING_DELAY);
     return () => clearTimeout(timer);
   }, [note]);
 
+  const handleEmojiChange = (emoji: string) => {
+    const newNote = { ...note, emoji };
+    setNote(newNote);
+    updateStateNote(newNote);
+  };
+
   return (
     <div className="size-full px-12 pb-24 pt-4 text-base sm:px-[max(30px,calc(50%-350px))]">
-      <p className="text-sm text-foreground-500 text-end mt-5 mb-2">
-        {isPending
-          ? "Saving..."
-          : isTheSameNote
-          ? `Saved at ${formatRelative(
-              data?.updatedAt ?? data.createdAt,
-              Date.now()
-            )}`
-          : "Unsaved changes"}
-      </p>
+      <div className="flex items-center gap-2 justify-between">
+        <EmojiPicker emoji={note.emoji!} onSelect={handleEmojiChange} />
+        <p className="text-sm text-foreground-500 mt-5 mb-2">
+          {isPending
+            ? "Saving..."
+            : isTheSameNote
+            ? `Saved at ${formatRelative(
+                data?.updatedAt ?? data.createdAt,
+                Date.now()
+              )}`
+            : "Unsaved changes"}
+        </p>
+      </div>
       <Plate
         editor={editor}
         onValueChange={({ value }) => setNote({ ...note, content: value })}

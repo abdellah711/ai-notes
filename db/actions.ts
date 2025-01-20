@@ -68,6 +68,7 @@ const UpdateNoteSchema = z.object({
   noteId: z.number().int(),
   title: z.string(),
   content: z.array(z.any()),
+  emoji: z.string().optional(),
 });
 
 export type UpdateNote = z.infer<typeof UpdateNoteSchema>;
@@ -82,6 +83,7 @@ export const updateNote = async (data: UpdateNote) => {
       title: note.title,
       content: note.content,
       updatedAt: new Date(),
+      emoji: note.emoji,
     })
     .where(
       and(
