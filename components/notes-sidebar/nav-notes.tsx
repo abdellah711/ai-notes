@@ -4,19 +4,21 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import type { Note } from "@/db/schema/note";
+import { useNotesStore } from "@/stores/notes";
 import { Skeleton } from "@nextui-org/skeleton";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { use } from "react";
 
-type Props = {
-  notesPromise: Promise<Note[]>;
-};
+type Props = {};
 
-export function NavNotes({ notesPromise }: Props) {
-  const notes = use(notesPromise);
+export function NavNotes({}: Props) {
+  const notes = useNotesStore((state) => state.notes);
+  const isLoading = useNotesStore((state) => state.isLoading);
   const { noteId } = useParams();
+
+  if (isLoading) {
+    return <NotesSkeleton />;
+  }
 
   return notes.length ? (
     <SidebarMenu>

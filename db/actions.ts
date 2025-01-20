@@ -31,7 +31,7 @@ export const createNewNote = async () => {
     })
     .returning();
 
-  redirect(`/notes/${newNote[0].noteId}`);
+  return newNote[0];
 };
 
 export const getNotes = async () => {
@@ -39,7 +39,8 @@ export const getNotes = async () => {
   return db
     .select()
     .from(noteTable)
-    .where(eq(noteTable.userId, session.user.id));
+    .where(eq(noteTable.userId, session.user.id))
+    .orderBy(noteTable.createdAt);
 };
 
 export const getNote = async (noteId: string) => {

@@ -11,6 +11,7 @@ import isEqual from "lodash-es/isEqual";
 import { updateNote } from "@/db/actions";
 import { formatRelative } from "date-fns";
 import { SidebarTrigger } from "../ui/sidebar";
+import { useNotesStore } from "@/stores/notes";
 
 type Props = {
   note: Note;
@@ -21,12 +22,18 @@ const SAVING_DELAY = 1000;
 export function NoteEditor({ note: initialNote }: Props) {
   const editor = useCreateEditor({ value: initialNote.content as any });
   const editorRef = useRef<HTMLDivElement>(null);
+  const updateStateNote = useNotesStore((state) => state.updateNote);
   const {
     mutateAsync: saveNote,
     variables: savedNote = initialNote,
     isPending,
     data = initialNote,
-  } = useMutation({ mutationFn: updateNote });
+  } = useMutation({
+    mutationFn: updateNote,
+    onSuccess: (data) => {
+      updateStateNote(data);
+    },
+  });
   const [note, setNote] = useState(initialNote);
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {

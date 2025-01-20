@@ -18,11 +18,22 @@ import {
 import { createNewNote } from "@/db/actions";
 import { Button } from "@nextui-org/react";
 import { useMutation } from "@tanstack/react-query";
+import { useRouter } from "@/hooks/use-router";
+import { useNotesStore } from "@/stores/notes";
 
 type Props = React.ComponentProps<typeof Sidebar>;
 
 export function NotesSidebar({ children, ...props }: Props) {
-  const { isPending, mutate } = useMutation({ mutationFn: createNewNote });
+  const router = useRouter();
+  const addNote = useNotesStore((state) => state.addNote);
+  const { isPending, mutate } = useMutation({
+    mutationFn: createNewNote,
+    onSuccess: (data) => {
+      if (!data.noteId) return;
+      addNote(data);
+      router.push(`/notes/${data.noteId}`);
+    },
+  });
 
   return (
     <Sidebar variant="inset" {...props}>
@@ -46,9 +57,12 @@ export function NotesSidebar({ children, ...props }: Props) {
           size="sm"
           color="primary"
           className="self-end"
-          startContent={!isPending && <PlusIcon className="size-4" />}
+          startContent={
+            !isPending &&
+            !router.isNavigating && <PlusIcon className="size-4" />
+          }
           onPress={() => void mutate()}
-          isLoading={isPending}
+          isLoading={isPending || router.isNavigating}
         >
           New Note
         </Button>
