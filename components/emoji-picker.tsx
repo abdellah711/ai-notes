@@ -2,7 +2,7 @@ import Picker from "@emoji-mart/react";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 import { Button } from "./ui/button";
-import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
+import { Popover, PopoverContent, PopoverTrigger } from "@nextui-org/react";
 
 type Props = {
   emoji?: string;
@@ -25,8 +25,8 @@ export default function EmojiPicker({ emoji, onSelect }: Props) {
   };
 
   return (
-    <Popover open={isOpen} onOpenChange={setIsOpen}>
-      <PopoverTrigger asChild>
+    <Popover isOpen={isOpen} onOpenChange={setIsOpen}>
+      <PopoverTrigger>
         <Button variant="ghost" className="text-3xl size-12 -ms-1.5">
           {selectedEmoji}
         </Button>

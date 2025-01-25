@@ -1,3 +1,4 @@
+import ChatFab from "@/components/chat/chat-fab";
 import NoteDropdownMenu from "@/components/note-dropdown-menu";
 import { NotesSidebar } from "@/components/notes-sidebar";
 import { NavNotes } from "@/components/notes-sidebar/nav-notes";
@@ -29,6 +30,7 @@ export default function NotesLayout({ children }: Props) {
             </div>
           </header>
           {children}
+          <ChatFab />
         </SidebarInset>
       </NotesStoreProvider>
     </SidebarProvider>
