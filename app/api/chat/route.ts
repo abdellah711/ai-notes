@@ -27,14 +27,14 @@ export const POST = async (req: Request) => {
 
   const result = streamText({
     model: google("gemini-1.5-flash"),
-    system: `you're a helpful assistant
-check user's notes to get a context of the user's question
-if the user's question is not related to any of the notes, answer the question
-`,
+    system: `You are a helpful assistant designed to assist the user with their notes. 
+- Review the user's notes (by calling \`getRelevantNotes\`) to gather context and ensure your response aligns with their existing content. 
+- If the user's question is directly related to any of their notes, incorporate relevant details from those notes to provide a tailored answer. 
+- If the question does not relate to any of the notes, provide a general response to the user's inquiry.`,
     messages,
     tools: {
       getRelevantNotes: tool({
-        description: `get user's notes (including title, content and creation date) to answer his question`,
+        description: `Retrieve the user's notes (title, content, date) by calling this tool to help answer their question`,
         parameters: z.object({
           question: z.string().describe("The user's question"),
         }),
