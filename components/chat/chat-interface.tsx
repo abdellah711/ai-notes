@@ -1,7 +1,8 @@
 import { cn } from "@/lib/utils";
-import { Textarea, Button, Alert } from "@nextui-org/react";
+import { Textarea, Button, Alert, Spinner } from "@nextui-org/react";
+import { ToolInvocation } from "ai";
 import { Message, useChat } from "ai/react";
-import { SendIcon } from "lucide-react";
+import { CheckIcon, SendIcon } from "lucide-react";
 import Markdown from "markdown-to-jsx";
 import { KeyboardEventHandler } from "react";
 
@@ -46,14 +47,14 @@ export default function ChatInterface({}: Props) {
       <div className="mb-3 px-5">
         <div>
           <h1 className="text-lg font-semibold text-foreground-700">
-            Chat with AI
+            Chat with Notes
           </h1>
           <p className="text-foreground-500">
             Ask any question related to your notes
           </p>
         </div>
       </div>
-      <div className="min-h-72 flex-1 flex flex-col-reverse gap-2 mt-3 px-5 w-full text-foreground-800 overflow-y-auto chat-scrollbar">
+      <div className="min-h-72 flex-1 flex flex-col-reverse mt-3 px-5 w-full text-foreground-800 overflow-y-auto chat-scrollbar">
         <div className="flex-1" />
         {error && (
           <Alert
@@ -116,10 +117,14 @@ type MessageProps = {
 };
 
 function MessageItem({ message }: MessageProps) {
+  if (message.toolInvocations?.length) {
+    return <CheckingNotesItem tool={message.toolInvocations[0]} />;
+  }
+
   return (
     <div
       className={cn(
-        "py-2 selection:bg-primary-300 prose prose-sm dark:prose-invert",
+        "py-2 selection:bg-primary-300 prose prose-sm dark:prose-invert mb-2",
         {
           "bg-primary-100 self-end px-3 rounded-lg max-w-[80%]":
             message.role === "user",
@@ -128,6 +133,23 @@ function MessageItem({ message }: MessageProps) {
       )}
     >
       <Markdown>{message.content}</Markdown>
+    </div>
+  );
+}
+
+function CheckingNotesItem({ tool }: { tool: ToolInvocation }) {
+  return (
+    <div className="text-sm text-foreground-500 flex items-center gap-2 select-none">
+      {tool.state === "call" ? (
+        <>
+          <Spinner size="sm" classNames={{ wrapper: "w-4 h-4" }} />
+          <span>Checking notes</span>
+        </>
+      ) : (
+        <>
+          <CheckIcon className="w-4 h-4" /> <span>Notes checked</span>
+        </>
+      )}
     </div>
   );
 }
