@@ -17,7 +17,7 @@ type Props = {
   note: Note;
 };
 
-const SAVING_DELAY = 1000;
+const SAVING_DELAY = 2000;
 
 export function NoteEditor({ note: initialNote }: Props) {
   const editor = useCreateEditor({ value: initialNote.content as any });

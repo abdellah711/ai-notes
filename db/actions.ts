@@ -1,15 +1,18 @@
 "use server";
 import { auth } from "@/lib/auth";
-import { headers } from "next/headers";
-import { redirect } from "next/navigation";
-import "server-only";
-import { db } from ".";
-import { noteTable } from "./schema/note";
+import { generateNoteEmbedding } from "@/lib/embedding";
+import { serializeMdNodes } from "@udecode/plate-markdown";
 import { and, eq } from "drizzle-orm";
+import isEqual from "lodash-es/isEqual";
+import { headers } from "next/headers";
 import { cache } from "react";
+import "server-only";
 import { z } from "zod";
+import { db } from ".";
+import { embeddingTable } from "./schema/embedding";
+import { noteTable } from "./schema/note";
 
-const getSession = cache(async () => {
+export const getSession = cache(async () => {
   const session = await auth.api.getSession({
     headers: await headers(),
   });
@@ -75,24 +78,61 @@ export type UpdateNote = z.infer<typeof UpdateNoteSchema>;
 
 export const updateNote = async (data: UpdateNote) => {
   const note = UpdateNoteSchema.parse(data);
-  const session = await getSession();
+  const [session, [existingNote]] = await Promise.all([
+    getSession(),
+    db
+      .select()
+      .from(noteTable)
+      .where(eq(noteTable.noteId, note.noteId))
+      .limit(1),
+  ]);
 
-  return await db
-    .update(noteTable)
-    .set({
-      title: note.title,
-      content: note.content,
-      updatedAt: new Date(),
-      emoji: note.emoji,
-    })
-    .where(
-      and(
-        eq(noteTable.noteId, note.noteId),
-        eq(noteTable.userId, session.user.id)
+  const markdown = serializeMdNodes(note.content);
+
+  return db.transaction(async (tx) => {
+    const updatedNote = tx
+      .update(noteTable)
+      .set({
+        title: note.title,
+        content: note.content,
+        updatedAt: new Date(),
+        emoji: note.emoji,
+      })
+      .where(
+        and(
+          eq(noteTable.noteId, note.noteId),
+          eq(noteTable.userId, session.user.id)
+        )
       )
-    )
-    .returning()
-    .then((res) => res[0]);
+      .returning()
+      .then((res) => res[0]);
+
+    if (
+      existingNote.title?.trim() === note.title.trim() &&
+      isEqual(existingNote.content, note.content)
+    ) {
+      return updatedNote;
+    }
+
+    await generateNoteEmbedding(note).then((embedding) =>
+      tx
+        .insert(embeddingTable)
+        .values({
+          noteId: note.noteId,
+          content: markdown,
+          embedding,
+          userId: session.user.id,
+        })
+        .onConflictDoUpdate({
+          target: embeddingTable.noteId,
+          set: {
+            content: markdown,
+            embedding,
+          },
+        })
+    );
+    return updatedNote;
+  });
 };
 
 export const deleteNote = async (noteId: number) => {

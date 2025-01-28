@@ -1,6 +1,7 @@
-import { streamText } from "ai";
-import { createGroq } from "@ai-sdk/groq";
+import { streamText, tool } from "ai";
 import { z } from "zod";
+import { createGoogleGenerativeAI } from "@ai-sdk/google";
+import { findRelatedNotes } from "@/lib/embedding";
 
 const messagesSchema = z.object({
   messages: z.array(
@@ -11,8 +12,8 @@ const messagesSchema = z.object({
   ),
 });
 
-const groq = createGroq({
-  apiKey: process.env.GROQ_API_KEY,
+const google = createGoogleGenerativeAI({
+  apiKey: process.env.GOOGLE_API_KEY,
 });
 
 export const POST = async (req: Request) => {
@@ -22,12 +23,25 @@ export const POST = async (req: Request) => {
     return new Response(JSON.stringify({ error }), { status: 400 });
   }
 
-  const messages = data.messages;
+  const messages = data.messages.filter((message) => message.content !== "");
 
   const result = streamText({
-    model: groq("llama-3.1-8b-instant"),
-    system: `you're a helpful assistant`,
+    model: google("gemini-1.5-flash"),
+    system: `you're a helpful assistant
+check user's notes to get a context of the user's question
+if the user's question is not related to any of the notes, answer the question
+`,
     messages,
+    tools: {
+      getRelevantNotes: tool({
+        description: `get user's notes (including title, content and creation date) to answer his question`,
+        parameters: z.object({
+          question: z.string().describe("The user's question"),
+        }),
+        execute: async ({ question }) => findRelatedNotes(question),
+      }),
+    },
+    maxSteps: 3,
   });
   return result.toDataStreamResponse();
 };
