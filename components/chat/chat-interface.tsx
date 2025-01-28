@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { Textarea, Button } from "@nextui-org/react";
+import { Textarea, Button, Alert } from "@nextui-org/react";
 import { useChat } from "ai/react";
 import { SendIcon } from "lucide-react";
 import Markdown from "markdown-to-jsx";
@@ -8,15 +8,18 @@ import { KeyboardEventHandler } from "react";
 type Props = {};
 
 export default function ChatInterface({}: Props) {
-  const { messages, input, handleInputChange, handleSubmit } = useChat({
-    initialMessages: [
-      {
-        id: "1",
-        content: "Hello! How can I help you?",
-        role: "assistant",
-      },
-    ],
-  });
+  const { messages, input, handleInputChange, handleSubmit, error, reload } =
+    useChat({
+      initialMessages: [
+        {
+          id: "1",
+          content: "Hello! How can I help you?",
+          role: "assistant",
+        },
+      ],
+      maxSteps: 3,
+      onError: console.error,
+    });
 
   const handleKeyDown: KeyboardEventHandler = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -37,6 +40,29 @@ export default function ChatInterface({}: Props) {
       </div>
       <div className="min-h-72 flex-1 flex flex-col-reverse gap-2 mt-3 px-5 w-full text-foreground-800 overflow-y-auto chat-scrollbar">
         <div className="flex-1" />
+        {error && (
+          <Alert
+            color="danger"
+            classNames={{
+              base: "items-center grow-0 py-2",
+              description: "text-sm",
+              iconWrapper: "h-7 w-7",
+              alertIcon: "w-4 h-4",
+            }}
+            endContent={
+              <Button
+                variant="light"
+                color="danger"
+                size="sm"
+                onPress={() => reload()}
+              >
+                Retry
+              </Button>
+            }
+          >
+            {error.message}
+          </Alert>
+        )}
         {messages.toReversed().map((message) => (
           <div
             key={message.id}
