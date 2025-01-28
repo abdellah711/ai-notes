@@ -1,14 +1,25 @@
 import { cn } from "@/lib/utils";
-import { Textarea, Button, Alert, Spinner } from "@nextui-org/react";
+import {
+  Textarea,
+  Button,
+  Alert,
+  Spinner,
+  DropdownMenu,
+  DropdownTrigger,
+  Dropdown,
+  DropdownItem,
+} from "@nextui-org/react";
 import { ToolInvocation } from "ai";
 import { Message, useChat } from "ai/react";
-import { CheckIcon, SendIcon } from "lucide-react";
+import { CheckIcon, MoreVerticalIcon, SendIcon } from "lucide-react";
 import Markdown from "markdown-to-jsx";
-import { KeyboardEventHandler } from "react";
+import { KeyboardEventHandler, useEffect } from "react";
+import { INITIAL_MESSAGES, useChatHistoryStore } from "@/stores/chat-history";
 
 type Props = {};
 
 export default function ChatInterface({}: Props) {
+  const chatHistory = useChatHistoryStore();
   const {
     messages,
     input,
@@ -18,17 +29,16 @@ export default function ChatInterface({}: Props) {
     reload,
     isLoading,
     stop,
+    setMessages,
   } = useChat({
-    initialMessages: [
-      {
-        id: "1",
-        content: "Hello! How can I help you?",
-        role: "assistant",
-      },
-    ],
+    initialMessages: chatHistory.messages,
     maxSteps: 3,
     onError: console.error,
   });
+
+  useEffect(() => {
+    chatHistory.setMessages(messages);
+  }, [messages]);
 
   const handleKeyDown: KeyboardEventHandler = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -42,9 +52,14 @@ export default function ChatInterface({}: Props) {
     stop();
   };
 
+  const handleClear = () => {
+    chatHistory.clearMessages();
+    setMessages(INITIAL_MESSAGES);
+  };
+
   return (
     <>
-      <div className="mb-3 px-5">
+      <div className="mb-3 px-5 flex w-full">
         <div>
           <h1 className="text-lg font-semibold text-foreground-700">
             Chat with Notes
@@ -53,6 +68,18 @@ export default function ChatInterface({}: Props) {
             Ask any question related to your notes
           </p>
         </div>
+        <Dropdown size="sm" className="min-w-32" placement="bottom-end">
+          <DropdownTrigger className="ms-auto">
+            <Button size="sm" variant="light" isIconOnly>
+              <MoreVerticalIcon size={16} />
+            </Button>
+          </DropdownTrigger>
+          <DropdownMenu>
+            <DropdownItem key="clear" onPress={handleClear}>
+              Clear Chat
+            </DropdownItem>
+          </DropdownMenu>
+        </Dropdown>
       </div>
       <div className="min-h-72 flex-1 flex flex-col-reverse mt-3 px-5 w-full text-foreground-800 overflow-y-auto chat-scrollbar">
         <div className="flex-1" />

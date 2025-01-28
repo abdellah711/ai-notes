@@ -60,7 +60,7 @@ export default function NoteDropdownMenu({ noteId: defaultNoteId }: Props) {
           </ModalFooter>
         </ModalContent>
       </Modal>
-      <Dropdown className="min-w-32">
+      <Dropdown className="min-w-32" placement="bottom-end">
         <DropdownTrigger>
           <Button size="sm" variant="light" isIconOnly>
             <MoreVerticalIcon size={16} />
