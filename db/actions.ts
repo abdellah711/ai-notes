@@ -137,11 +137,14 @@ export const updateNote = async (data: UpdateNote) => {
 
 export const deleteNote = async (noteId: number) => {
   const session = await getSession();
-  return await db
+  const deletedNote = db
     .delete(noteTable)
     .where(
       and(eq(noteTable.noteId, noteId), eq(noteTable.userId, session.user.id))
     )
     .returning()
     .then((res) => res[0]);
+  await db.delete(embeddingTable).where(eq(embeddingTable.noteId, noteId));
+
+  return deletedNote;
 };

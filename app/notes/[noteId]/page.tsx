@@ -1,18 +1,21 @@
+"use client";
 import { NoteEditor } from "@/components/editor/note-editor";
-import { getNote } from "@/db/actions";
-import { notFound } from "next/navigation";
+import { useNotesStore } from "@/stores/notes";
+import { notFound, useParams } from "next/navigation";
+import NoteLoading from "./loading";
+import { useMemo } from "react";
 
-type Props = {
-  params: Promise<{
-    noteId: string;
-  }>;
-};
+export default function NotePage() {
+  const { noteId } = useParams();
+  const notes = useNotesStore((state) => state.notes);
+  const isLoading = useNotesStore((state) => state.isLoading);
+  const note = useMemo(
+    () => notes.find((n) => n.noteId === Number(noteId)),
+    [noteId, isLoading]
+  );
+  if (isLoading) return <NoteLoading />;
 
-export default async function NotePage({ params }: Props) {
-  const { noteId } = await params;
-  const note = await getNote(noteId).catch((err) => {
-    console.error(err);
-    notFound();
-  });
-  return <NoteEditor note={note} />;
+  if (!note) return notFound();
+
+  return <NoteEditor initialNote={note} />;
 }

@@ -14,12 +14,12 @@ import { useEffect, useRef, useState } from "react";
 import EmojiPicker from "../emoji-picker";
 
 type Props = {
-  note: Note;
+  initialNote: Note;
 };
 
 const SAVING_DELAY = 2000;
 
-export function NoteEditor({ note: initialNote }: Props) {
+export function NoteEditor({ initialNote }: Props) {
   const editor = useCreateEditor({ value: initialNote.content as any });
   const editorRef = useRef<HTMLDivElement>(null);
   const updateStateNote = useNotesStore((state) => state.updateNote);
