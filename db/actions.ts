@@ -11,6 +11,7 @@ import { z } from "zod";
 import { db } from ".";
 import { embeddingTable } from "./schema/embedding";
 import { noteTable } from "./schema/note";
+import { redirect } from "next/navigation";
 
 export const getSession = cache(async () => {
   const session = await auth.api.getSession({
@@ -18,7 +19,7 @@ export const getSession = cache(async () => {
   });
 
   if (!session) {
-    throw new Error("Unauthorized");
+    redirect("/login");
   }
 
   return session;

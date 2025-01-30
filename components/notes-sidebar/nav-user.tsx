@@ -22,12 +22,13 @@ import { Avatar } from "@nextui-org/avatar";
 import { Skeleton } from "@nextui-org/skeleton";
 import { useState } from "react";
 import { ThemeSwitcher } from "../theme-switcher";
+import { useSession } from "@/app/session-provider";
 
 export function NavUser() {
   const { isMobile } = useSidebar();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const router = useRouter();
-  const { data, isPending } = authClient.useSession();
+  const { data, isPending } = useSession();
 
   const handleLogout = async (e: React.MouseEvent) => {
     e.preventDefault();

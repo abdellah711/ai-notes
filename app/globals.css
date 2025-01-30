@@ -6,7 +6,7 @@
   :root {
     --radius: 0.5rem;
 
-    --sidebar-background: var(--nextui-content1);
+    --sidebar-background: 0 0 99%;
 
     --sidebar-foreground: var(--nextui-foreground-700);
 
@@ -21,6 +21,10 @@
     --sidebar-border: var(--nextui-foreground-100);
 
     --sidebar-ring: var(--nextui-primary);
+  }
+
+  .dark {
+    --sidebar-background: var(--nextui-content1);
   }
   [data-registry="plate"].dark {
     --brand: 213.3 93.9% 67.8%;
