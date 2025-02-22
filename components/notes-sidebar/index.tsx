@@ -15,25 +15,18 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { createNewNote } from "@/db/actions";
-import { Button } from "@nextui-org/react";
-import { useMutation } from "@tanstack/react-query";
+import { useCreateNote } from "@/hooks/use-create-note";
 import { useRouter } from "@/hooks/use-router";
 import { useNotesStore } from "@/stores/notes";
+import { Button } from "@nextui-org/react";
+import Link from "next/link";
 
 type Props = React.ComponentProps<typeof Sidebar>;
 
 export function NotesSidebar({ children, ...props }: Props) {
   const router = useRouter();
   const addNote = useNotesStore((state) => state.addNote);
-  const { isPending, mutate } = useMutation({
-    mutationFn: createNewNote,
-    onSuccess: (data) => {
-      if (!data.noteId) return;
-      addNote(data);
-      router.push(`/notes/${data.noteId}`);
-    },
-  });
+  const { isPending, createNewNote } = useCreateNote();
 
   return (
     <Sidebar variant="inset" {...props}>
@@ -41,14 +34,14 @@ export function NotesSidebar({ children, ...props }: Props) {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
-              <a href="#">
+              <Link href="/notes">
                 <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
                   <WandSparkles className="size-4" />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-semibold">AI Notes</span>
                 </div>
-              </a>
+              </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
@@ -61,7 +54,7 @@ export function NotesSidebar({ children, ...props }: Props) {
             !isPending &&
             !router.isNavigating && <PlusIcon className="size-4" />
           }
-          onPress={() => void mutate()}
+          onPress={() => void createNewNote()}
           isLoading={isPending || router.isNavigating}
         >
           New Note

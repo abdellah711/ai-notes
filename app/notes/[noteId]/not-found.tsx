@@ -15,7 +15,7 @@ export default function notFound() {
       <p className="text-foreground-500 my-5">
         The note you are looking for does not exist
       </p>
-      <p className="text-sm text-foreground-400 mb-3">Available notes</p>
+      <p className="text-sm text-foreground-500 mb-3">Available notes</p>
       <ul className="flex flex-col gap-3">
         {isLoading &&
           new Array(5)
@@ -23,13 +23,14 @@ export default function notFound() {
             .map((_, i) => (
               <Skeleton key={i} className="w-full h-6 rounded-md" />
             ))}
-        {notes.map((note) => (
+        {notes.slice(0, 5).map((note) => (
           <Button
             key={note.noteId}
             href={`/notes/${note.noteId}`}
             variant="flat"
             className="justify-start"
             as={Link}
+            startContent={<span>{note.emoji}</span>}
             endContent={
               <p className="ms-auto text-sm text-foreground-400">
                 {formatRelative(note.updatedAt ?? note.createdAt, Date.now())}

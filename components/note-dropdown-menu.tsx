@@ -34,6 +34,7 @@ export default function NoteDropdownMenu({ noteId: defaultNoteId }: Props) {
     mutationFn: deleteNote,
     onSuccess: () => {
       deleteNoteStore(noteId);
+      onClose();
       router.push("/notes");
     },
   });
