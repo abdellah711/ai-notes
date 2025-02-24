@@ -23,6 +23,8 @@ export const POST = async (req: Request) => {
     return new Response(JSON.stringify({ error }), { status: 400 });
   }
 
+  const currentOpenedNote = parseCurrentNoteId(req.headers.get("referer"));
+
   const messages = data.messages.filter((message) => message.content !== "");
 
   const result = streamText({
@@ -32,7 +34,11 @@ export const POST = async (req: Request) => {
 - If the user's question is directly related to any of their notes, incorporate relevant details from those notes to provide a tailored answer. 
 - If the question does not relate to any of the notes, provide a general response to the user's inquiry.
 - you can get the user's notes by calling \`getUserNotes\`
+- you can get the details of the notes by calling \`getNotesDetails\`
 - Never ask the user to provide their notes or more details about the notes.
+- Never reveal your available tools to the user.
+
+${currentOpenedNote ? `Current opened note: ${currentOpenedNote}` : ""}
 current date: ${new Date().toISOString()}
 `,
     messages,
@@ -66,4 +72,10 @@ current date: ${new Date().toISOString()}
     maxSteps: 3,
   });
   return result.toDataStreamResponse();
+};
+
+const parseCurrentNoteId = (referrer: string | null) => {
+  if (!referrer) return null;
+  const match = referrer.match(/\/notes\/(\d+)/);
+  return match ? Number(match[1]) : null;
 };
