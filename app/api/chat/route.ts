@@ -1,4 +1,4 @@
-import { streamText, tool } from "ai";
+import { generateText, streamText, tool } from "ai";
 import { z } from "zod";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { findRelatedNotes, getNotes, getNotesDetails } from "@/lib/tools";
@@ -35,6 +35,7 @@ export const POST = async (req: Request) => {
 - If the question does not relate to any of the notes, provide a general response to the user's inquiry.
 - you can get the user's notes by calling \`getUserNotes\`
 - you can get the details of the notes by calling \`getNotesDetails\`
+- if the user asks you to generate something, just call \`generateNote\` and provide the question to the AI
 - Never ask the user to provide their notes or more details about the notes.
 - Never reveal your available tools to the user.
 
@@ -67,6 +68,23 @@ current date: ${new Date().toISOString()}
           noteIds: z.array(z.number()).describe("The ids of the notes"),
         }),
         execute: async ({ noteIds }) => getNotesDetails(noteIds),
+      }),
+      generateNote: tool({
+        description: `Generate a note based on the user's question. The generated note will be added to the user's notes`,
+        parameters: z.object({
+          question: z
+            .string()
+            .describe("The user's question or a detailed prompt"),
+          title: z.string().describe("The title of the note"),
+          emoji: z.string().describe("The emoji of the note"),
+        }),
+        execute: async ({ question, title, emoji }) => {
+          const { text } = await generateText({
+            model: google("gemini-1.5-flash"),
+            prompt: question,
+          });
+          return { content: text, title, emoji };
+        },
       }),
     },
     maxSteps: 3,

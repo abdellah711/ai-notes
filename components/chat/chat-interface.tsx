@@ -1,25 +1,29 @@
 import { cn } from "@/lib/utils";
+import { INITIAL_MESSAGES, useChatHistoryStore } from "@/stores/chat-history";
+import { useGeneratedNote } from "@/stores/generated-note";
 import {
-  Textarea,
-  Button,
   Alert,
-  Spinner,
-  DropdownMenu,
-  DropdownTrigger,
+  Button,
   Dropdown,
   DropdownItem,
+  DropdownMenu,
+  DropdownTrigger,
+  Spinner,
+  Textarea,
 } from "@nextui-org/react";
 import { ToolInvocation } from "ai";
 import { Message, useChat } from "ai/react";
 import { CheckIcon, MoreVerticalIcon, SendIcon } from "lucide-react";
 import Markdown from "markdown-to-jsx";
+import { useRouter } from "next/navigation";
 import { KeyboardEventHandler, useEffect } from "react";
-import { INITIAL_MESSAGES, useChatHistoryStore } from "@/stores/chat-history";
 
 type Props = {};
 
 export default function ChatInterface({}: Props) {
   const chatHistory = useChatHistoryStore();
+  const setGeneratedNote = useGeneratedNote((state) => state.setGeneratedNote);
+  const router = useRouter();
   const {
     messages,
     input,
@@ -34,10 +38,27 @@ export default function ChatInterface({}: Props) {
     initialMessages: chatHistory.messages,
     maxSteps: 3,
     onError: console.error,
+    onToolCall: ({ toolCall }) => {
+      if (toolCall.toolName === "generateNote") {
+        const { title, emoji } = toolCall.args as {
+          title: string;
+          emoji: string;
+        };
+        setGeneratedNote({ title, emoji, content: "" });
+        router.push(`/notes/generate`);
+      }
+    },
   });
 
   useEffect(() => {
     chatHistory.setMessages(messages);
+    const lastToolInvocation = messages.at(-1)?.toolInvocations?.[0];
+    if (
+      lastToolInvocation?.toolName === "generateNote" &&
+      lastToolInvocation?.state === "result"
+    ) {
+      setGeneratedNote(lastToolInvocation?.result as any);
+    }
   }, [messages]);
 
   const handleKeyDown: KeyboardEventHandler = (e) => {
@@ -145,7 +166,12 @@ type MessageProps = {
 
 function MessageItem({ message }: MessageProps) {
   if (message.toolInvocations?.length) {
-    return <CheckingNotesItem tool={message.toolInvocations[0]} />;
+    return message.toolInvocations.map((toolInvocation) => (
+      <ToolInvocationsItem
+        key={toolInvocation.toolCallId}
+        tool={toolInvocation}
+      />
+    ));
   }
 
   return (
@@ -162,6 +188,18 @@ function MessageItem({ message }: MessageProps) {
       <Markdown>{message.content}</Markdown>
     </div>
   );
+}
+
+function ToolInvocationsItem({ tool }: { tool: ToolInvocation }) {
+  if (
+    ["getRelevantNotes", "getUserNotes", "getNotesDetails"].includes(
+      tool.toolName
+    )
+  ) {
+    return <CheckingNotesItem tool={tool} />;
+  }
+
+  return null;
 }
 
 function CheckingNotesItem({ tool }: { tool: ToolInvocation }) {

@@ -26,6 +26,8 @@ const createNotesStore = () => {
               n.noteId === note.noteId ? note : n
             ),
           })),
+        insertNote: (note: Note) =>
+          set((state) => ({ notes: [...state.notes, note] })),
         addNote: (note: Note) =>
           set((state) => ({ notes: [...state.notes, note] })),
         deleteNote: (noteId: number) =>

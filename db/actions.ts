@@ -25,7 +25,7 @@ export const getSession = cache(async () => {
   return session;
 });
 
-export const createNewNote = async () => {
+export const createEmptyNote = async () => {
   const session = await getSession();
 
   const newNote = await db
@@ -69,7 +69,7 @@ export const getNote = async (noteId: string) => {
 };
 
 const UpdateNoteSchema = z.object({
-  noteId: z.number().int(),
+  noteId: z.number().int().optional(),
   title: z.string(),
   content: z.array(z.any()),
   emoji: z.string().optional(),
@@ -77,8 +77,13 @@ const UpdateNoteSchema = z.object({
 
 export type UpdateNote = z.infer<typeof UpdateNoteSchema>;
 
-export const updateNote = async (data: UpdateNote) => {
+export const upsertNote = async (data: UpdateNote) => {
   const note = UpdateNoteSchema.parse(data);
+
+  if (!note.noteId) {
+    return createNote(note);
+  }
+
   const [session, [existingNote]] = await Promise.all([
     getSession(),
     db
@@ -87,6 +92,10 @@ export const updateNote = async (data: UpdateNote) => {
       .where(eq(noteTable.noteId, note.noteId))
       .limit(1),
   ]);
+
+  if (existingNote.userId !== session.user.id) {
+    throw new Error("Note not found");
+  }
 
   const markdown = serializeMdNodes(note.content);
 
@@ -101,7 +110,7 @@ export const updateNote = async (data: UpdateNote) => {
       })
       .where(
         and(
-          eq(noteTable.noteId, note.noteId),
+          eq(noteTable.noteId, note.noteId!),
           eq(noteTable.userId, session.user.id)
         )
       )
@@ -119,7 +128,7 @@ export const updateNote = async (data: UpdateNote) => {
       tx
         .insert(embeddingTable)
         .values({
-          noteId: note.noteId,
+          noteId: note.noteId!,
           content: markdown,
           embedding,
           userId: session.user.id,
@@ -148,4 +157,26 @@ export const deleteNote = async (noteId: number) => {
   await db.delete(embeddingTable).where(eq(embeddingTable.noteId, noteId));
 
   return deletedNote;
+};
+
+const createNote = async (note: UpdateNote) => {
+  const session = await getSession();
+  const markdown = serializeMdNodes(note.content);
+  const newNotePromise = db
+    .insert(noteTable)
+    .values({
+      ...note,
+      userId: session.user.id,
+    })
+    .returning()
+    .then((res) => res[0]);
+  const embedding = await generateNoteEmbedding(note);
+  const newNote = await newNotePromise;
+  await db.insert(embeddingTable).values({
+    content: markdown,
+    embedding,
+    noteId: newNote.noteId,
+    userId: session.user.id,
+  });
+  return newNote;
 };
