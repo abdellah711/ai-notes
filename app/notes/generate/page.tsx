@@ -17,5 +17,5 @@ export default function GeneratedNotePage() {
 
   if (!note?.title) return null;
 
-  return <NoteEditor generatedNote={note} />;
+  return <NoteEditor generatedNote={note} key={note.title + note.emoji} />;
 }

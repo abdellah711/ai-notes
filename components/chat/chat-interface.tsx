@@ -1,4 +1,3 @@
-import { cn } from "@/lib/utils";
 import { INITIAL_MESSAGES, useChatHistoryStore } from "@/stores/chat-history";
 import { useGeneratedNote } from "@/stores/generated-note";
 import {
@@ -8,15 +7,13 @@ import {
   DropdownItem,
   DropdownMenu,
   DropdownTrigger,
-  Spinner,
   Textarea,
 } from "@nextui-org/react";
-import { ToolInvocation } from "ai";
-import { Message, useChat } from "ai/react";
-import { CheckIcon, MoreVerticalIcon, SendIcon } from "lucide-react";
-import Markdown from "markdown-to-jsx";
+import { useChat } from "ai/react";
+import { MoreVerticalIcon, SendIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { KeyboardEventHandler, useEffect } from "react";
+import MessageItem from "./message";
 
 type Props = {};
 
@@ -157,64 +154,5 @@ export default function ChatInterface({}: Props) {
         </Button>
       </form>
     </>
-  );
-}
-
-type MessageProps = {
-  message: Message;
-};
-
-function MessageItem({ message }: MessageProps) {
-  if (message.toolInvocations?.length) {
-    return message.toolInvocations.map((toolInvocation) => (
-      <ToolInvocationsItem
-        key={toolInvocation.toolCallId}
-        tool={toolInvocation}
-      />
-    ));
-  }
-
-  return (
-    <div
-      className={cn(
-        "py-2 selection:bg-primary-300 prose prose-sm dark:prose-invert mb-2",
-        {
-          "bg-primary-100 self-end px-3 rounded-lg max-w-[80%]":
-            message.role === "user",
-          "justify-start": message.role === "assistant",
-        }
-      )}
-    >
-      <Markdown>{message.content}</Markdown>
-    </div>
-  );
-}
-
-function ToolInvocationsItem({ tool }: { tool: ToolInvocation }) {
-  if (
-    ["getRelevantNotes", "getUserNotes", "getNotesDetails"].includes(
-      tool.toolName
-    )
-  ) {
-    return <CheckingNotesItem tool={tool} />;
-  }
-
-  return null;
-}
-
-function CheckingNotesItem({ tool }: { tool: ToolInvocation }) {
-  return (
-    <div className="text-sm text-foreground-500 flex items-center gap-2 select-none">
-      {tool.state === "call" ? (
-        <>
-          <Spinner size="sm" classNames={{ wrapper: "w-4 h-4" }} />
-          <span>Checking notes</span>
-        </>
-      ) : (
-        <>
-          <CheckIcon className="w-4 h-4" /> <span>Notes checked</span>
-        </>
-      )}
-    </div>
   );
 }

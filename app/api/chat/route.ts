@@ -1,7 +1,12 @@
-import { generateText, streamText, tool } from "ai";
-import { z } from "zod";
+import {
+  findRelatedNotes,
+  generateNote,
+  getNotes,
+  getNotesDetails,
+} from "@/lib/tools";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
-import { findRelatedNotes, getNotes, getNotesDetails } from "@/lib/tools";
+import { streamText } from "ai";
+import { z } from "zod";
 
 const messagesSchema = z.object({
   messages: z.array(
@@ -12,7 +17,7 @@ const messagesSchema = z.object({
   ),
 });
 
-const google = createGoogleGenerativeAI({
+export const google = createGoogleGenerativeAI({
   apiKey: process.env.GOOGLE_API_KEY,
 });
 
@@ -35,7 +40,7 @@ export const POST = async (req: Request) => {
 - If the question does not relate to any of the notes, provide a general response to the user's inquiry.
 - you can get the user's notes by calling \`getUserNotes\`
 - you can get the details of the notes by calling \`getNotesDetails\`
-- if the user asks you to generate something, just call \`generateNote\` and provide the question to the AI
+- whenever the user asks you to generate or write something, just call \`generateNote\` and provide the question to the AI to generate the content
 - Never ask the user to provide their notes or more details about the notes.
 - Never reveal your available tools to the user.
 
@@ -44,48 +49,10 @@ current date: ${new Date().toISOString()}
 `,
     messages,
     tools: {
-      getRelevantNotes: tool({
-        description: `Retrieve the user's notes (title, content, date) by calling this tool to help answer their question`,
-        parameters: z.object({
-          question: z.string().describe("The user's question"),
-        }),
-        execute: async ({ question }) => findRelatedNotes(question),
-      }),
-      getUserNotes: tool({
-        description:
-          "Get the user's notes list including the total number of notes ordered by creation date, the result is limited to 10 notes, but you can use the offset to skip a number of notes",
-        parameters: z.object({
-          offset: z
-            .number()
-            .describe("The number of notes to skip (0 by default)")
-            .optional(),
-        }),
-        execute: ({ offset }) => getNotes(offset),
-      }),
-      getNotesDetails: tool({
-        description: `Get the details of the notes by calling this tool to help answer their question. The result is limited to 3 notes`,
-        parameters: z.object({
-          noteIds: z.array(z.number()).describe("The ids of the notes"),
-        }),
-        execute: async ({ noteIds }) => getNotesDetails(noteIds),
-      }),
-      generateNote: tool({
-        description: `Generate a note based on the user's question. The generated note will be added to the user's notes`,
-        parameters: z.object({
-          question: z
-            .string()
-            .describe("The user's question or a detailed prompt"),
-          title: z.string().describe("The title of the note"),
-          emoji: z.string().describe("The emoji of the note"),
-        }),
-        execute: async ({ question, title, emoji }) => {
-          const { text } = await generateText({
-            model: google("gemini-1.5-flash"),
-            prompt: question,
-          });
-          return { content: text, title, emoji };
-        },
-      }),
+      getRelevantNotes: findRelatedNotes,
+      getUserNotes: getNotes,
+      getNotesDetails,
+      generateNote,
     },
     maxSteps: 3,
   });
