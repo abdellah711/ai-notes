@@ -1,5 +1,4 @@
 "use server";
-import { Note } from "@/db/schema/note";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { embed } from "ai";
 
@@ -18,8 +17,11 @@ export const generateEmbedding = async (value: string) => {
   return embedding;
 };
 
-export const generateNoteEmbedding = async (
-  note: Pick<Note, "title" | "content">
-) => {
-  return generateEmbedding(`Title: ${note.title}\n\nContent: ${note.content}`);
+export const generateNoteEmbedding = async (note: {
+  title: string;
+  content: string;
+}) => {
+  return generateEmbedding(
+    [note.title?.trim(), note.content?.trim()].filter(Boolean).join("\n\n")
+  );
 };

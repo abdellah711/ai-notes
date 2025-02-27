@@ -1,4 +1,9 @@
+import { google } from "@/app/api/chat/route";
+import { db } from "@/db";
 import { getSession } from "@/db/actions";
+import { embeddingTable } from "@/db/schema/embedding";
+import { noteTable } from "@/db/schema/note";
+import { generateText, tool } from "ai";
 import {
   and,
   cosineDistance,
@@ -9,20 +14,19 @@ import {
   inArray,
   sql,
 } from "drizzle-orm";
-import { generateEmbedding } from "./embedding";
-import { embeddingTable } from "@/db/schema/embedding";
-import { db } from "@/db";
-import { noteTable } from "@/db/schema/note";
-import { generateText, tool } from "ai";
 import { z } from "zod";
-import { google } from "@/app/api/chat/route";
+import { generateEmbedding } from "./embedding";
 
 export const findRelatedNotes = tool({
   description: `Retrieve the user's notes (title, content, date) by calling this tool to help answer their question`,
   parameters: z.object({
-    question: z.string().describe("The user's question"),
+    query: z
+      .string()
+      .describe(
+        "a query refined and rephrased based on the user's question to find relevant notes"
+      ),
   }),
-  execute: async ({ question: query }) => {
+  execute: async ({ query }) => {
     const [session, embedding] = await Promise.all([
       getSession(),
       generateEmbedding(query),
@@ -46,7 +50,7 @@ export const findRelatedNotes = tool({
       )
       .innerJoin(noteTable, eq(embeddingTable.noteId, noteTable.noteId))
       .orderBy((t) => desc(t.similarity))
-      .limit(3);
+      .limit(4);
     return notes;
   },
 });
@@ -99,7 +103,7 @@ export const getNotesDetails = tool({
           inArray(noteTable.noteId, noteIds.slice(0, 3))
         )
       )
-      .limit(1);
+      .limit(noteIds.length);
     return notes;
   },
 });

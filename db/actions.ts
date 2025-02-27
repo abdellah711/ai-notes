@@ -124,7 +124,10 @@ export const upsertNote = async (data: UpdateNote) => {
       return updatedNote;
     }
 
-    await generateNoteEmbedding(note).then((embedding) =>
+    await generateNoteEmbedding({
+      title: note.title,
+      content: markdown,
+    }).then((embedding) =>
       tx
         .insert(embeddingTable)
         .values({
@@ -170,7 +173,10 @@ const createNote = async (note: UpdateNote) => {
     })
     .returning()
     .then((res) => res[0]);
-  const embedding = await generateNoteEmbedding(note);
+  const embedding = await generateNoteEmbedding({
+    title: note.title,
+    content: markdown,
+  });
   const newNote = await newNotePromise;
   await db.insert(embeddingTable).values({
     content: markdown,

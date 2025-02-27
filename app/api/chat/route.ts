@@ -33,7 +33,7 @@ export const POST = async (req: Request) => {
   const messages = data.messages.filter((message) => message.content !== "");
 
   const result = streamText({
-    model: google("gemini-1.5-flash"),
+    model: google("gemini-2.0-flash-exp"),
     system: `You are a helpful assistant designed to assist the user with their notes. 
 - Review the user's notes (by calling \`getRelevantNotes\`) to gather context and ensure your response aligns with their existing content. 
 - If the user's question is directly related to any of their notes, incorporate relevant details from those notes to provide a tailored answer. 
