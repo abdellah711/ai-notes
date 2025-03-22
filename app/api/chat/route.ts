@@ -1,6 +1,8 @@
 import {
+  appendToKnowledgeNote,
   findRelatedNotes,
   generateNote,
+  getKnowledgeBase,
   getNotes,
   getNotesDetails,
 } from "@/lib/tools";
@@ -34,7 +36,8 @@ export const POST = async (req: Request) => {
 
   const result = streamText({
     model: google("gemini-2.0-flash-exp"),
-    system: `You are a helpful assistant designed to assist the user with their notes. 
+    system: `You are a helpful assistant designed to assist the user with their notes.
+- Whenever the user asks you about something personal, check your knowledge base first then if nothing found, search in the user's notes
 - Review the user's notes (by calling \`getRelevantNotes\`) to gather context and ensure your response aligns with their existing content. 
 - If the user's question is directly related to any of their notes, incorporate relevant details from those notes to provide a tailored answer. 
 - If the question does not relate to any of the notes, provide a general response to the user's inquiry.
@@ -53,8 +56,10 @@ current date: ${new Date().toISOString()}
       getUserNotes: getNotes,
       getNotesDetails,
       generateNote,
+      getKnowledgeBase,
+      appendToKnowledgeNote,
     },
-    maxSteps: 3,
+    maxSteps: 5,
   });
   return result.toDataStreamResponse();
 };

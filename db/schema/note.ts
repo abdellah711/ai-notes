@@ -1,4 +1,4 @@
-import { jsonb, pgTable, serial, text } from "drizzle-orm/pg-core";
+import { boolean, jsonb, pgTable, serial, text } from "drizzle-orm/pg-core";
 import { timestamps } from "../columns";
 import { user } from "./auth";
 
@@ -10,6 +10,7 @@ export const noteTable = pgTable("notes", {
   title: text("title").default(""),
   emoji: text("emoji").default("📄"),
   content: jsonb("content").default("[]"),
+  isKnowledgeNote: boolean("is_knowledge_note").default(false),
   ...timestamps,
 });
 

@@ -28,8 +28,6 @@ const createNotesStore = () => {
           })),
         insertNote: (note: Note) =>
           set((state) => ({ notes: [...state.notes, note] })),
-        addNote: (note: Note) =>
-          set((state) => ({ notes: [...state.notes, note] })),
         deleteNote: (noteId: number) =>
           set((state) => ({
             notes: state.notes.filter((n) => n.noteId !== noteId),

@@ -1,20 +1,17 @@
 "use client";
 
-import { Plate } from "@udecode/plate/react";
-
 import { useCreateEditor } from "@/components/editor/use-create-editor";
-import { Editor, EditorContainer } from "@/components/plate-ui/editor";
 import { upsertNote } from "@/db/actions";
 import type { Note } from "@/db/schema/note";
+import { useRouter } from "@/hooks/use-router";
 import { useNotesStore } from "@/stores/notes";
 import { Button } from "@nextui-org/react";
 import { useMutation } from "@tanstack/react-query";
 import { formatRelative } from "date-fns";
 import isEqual from "lodash-es/isEqual";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import EmojiPicker from "../emoji-picker";
-import { cn } from "@/lib/utils";
-import { useRouter } from "@/hooks/use-router";
+import BaseEditor from "./base-editor";
 
 type Props =
   | {
@@ -32,13 +29,14 @@ type Props =
 
 const SAVING_DELAY = 2000;
 
+const KNOWLEDGE_NOTE_DESCRIPTION = `This note is used by the AI to store knowledge and information about you and your discussions. It is a safe place to write down any information that you want the AI to know...`;
+
 export function NoteEditor(props: Props) {
   const initialNote = props.initialNote ?? {
     ...props.generatedNote,
     content: [] as any,
   };
   const editor = useCreateEditor({ value: initialNote?.content as any });
-  const editorRef = useRef<HTMLDivElement>(null);
   const updateStateNote = useNotesStore((state) => state.updateNote);
   const insertNote = useNotesStore((state) => state.insertNote);
   const router = useRouter();
@@ -58,10 +56,6 @@ export function NoteEditor(props: Props) {
     },
   });
   const [note, setNote] = useState(initialNote);
-
-  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setNote({ ...note, title: e.target.value });
-  };
 
   const isTheSameNote =
     note.title === savedNote.title &&
@@ -139,42 +133,23 @@ export function NoteEditor(props: Props) {
         <EmojiPicker emoji={note.emoji!} onSelect={handleEmojiChange} />
         {renderSaveStatus()}
       </div>
-      <Plate
+      <BaseEditor
         editor={editor}
-        onValueChange={({ value }) => setNote({ ...note, content: value })}
-      >
-        <input
-          placeholder="Untitled"
-          className="outline-none text-4xl font-[inherit] bg-transparent font-bold text-foreground-800 mb-7 placeholder:font-normal"
-          value={note.title ?? ""}
-          onChange={handleTitleChange}
-          onKeyDown={(event) => {
-            if (event.key === "Enter") {
-              event.preventDefault();
-              editorRef.current?.focus();
-            }
-          }}
-        />
-        <EditorContainer>
-          <Editor
-            variant="none"
-            placeholder={
-              props.generatedNote ? "Generating..." : "Type something..."
-            }
-            ref={editorRef}
-            className={cn(
-              "text-foreground-700 pb-24 relative",
-              props.generatedNote?.content &&
-                "after:absolute after:inset-0 after:bg-primary/15 after:pointer-events-none"
-            )}
-            onKeyDown={(e) => {
-              if (e.ctrlKey && e.key === "b") {
-                e.stopPropagation();
-              }
-            }}
-          />
-        </EditorContainer>
-      </Plate>
+        title={note.title ?? ""}
+        onTitleChange={(title) => setNote({ ...note, title })}
+        placeholder={
+          props.generatedNote
+            ? "Generating..."
+            : note?.isKnowledgeNote
+            ? KNOWLEDGE_NOTE_DESCRIPTION
+            : "Type something..."
+        }
+        className={
+          props.generatedNote?.content &&
+          "after:absolute after:inset-0 after:bg-primary/15 after:pointer-events-none"
+        }
+        onChange={(content) => setNote({ ...note, content })}
+      />
     </div>
   );
 }

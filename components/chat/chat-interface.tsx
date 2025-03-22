@@ -57,7 +57,7 @@ export default function ChatInterface({}: Props) {
       setGeneratedNote(lastToolInvocation?.result as any);
     }
   }, [messages]);
-
+  console.log({ messages });
   const handleKeyDown: KeyboardEventHandler = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
       handleSubmit(e);

@@ -12,7 +12,9 @@ import { useParams } from "next/navigation";
 type Props = {};
 
 export function NavNotes({}: Props) {
-  const notes = useNotesStore((state) => state.notes);
+  const notes = useNotesStore((state) => state.notes)?.filter(
+    (item) => !item.isKnowledgeNote
+  );
   const isLoading = useNotesStore((state) => state.isLoading);
   const { noteId } = useParams();
 

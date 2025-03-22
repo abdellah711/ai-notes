@@ -17,15 +17,14 @@ import {
 } from "@/components/ui/sidebar";
 import { useCreateNote } from "@/hooks/use-create-note";
 import { useRouter } from "@/hooks/use-router";
-import { useNotesStore } from "@/stores/notes";
 import { Button } from "@nextui-org/react";
 import Link from "next/link";
+import KnowledgeNoteLink from "./knowledge-note-link";
 
 type Props = React.ComponentProps<typeof Sidebar>;
 
 export function NotesSidebar({ children, ...props }: Props) {
   const router = useRouter();
-  const addNote = useNotesStore((state) => state.addNote);
   const { isPending, createNewNote } = useCreateNote();
 
   return (
@@ -61,6 +60,7 @@ export function NotesSidebar({ children, ...props }: Props) {
         </Button>
       </SidebarHeader>
       <SidebarContent>
+        <KnowledgeNoteLink />
         <SidebarGroup>
           <SidebarGroupLabel>Notes</SidebarGroupLabel>
           {children}

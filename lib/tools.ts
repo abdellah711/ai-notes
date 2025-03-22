@@ -125,3 +125,49 @@ export const generateNote = tool({
     return { content: text, title, emoji };
   },
 });
+
+export const getKnowledgeBase = tool({
+  description: `Get the knowledge base which contains all the information saved about the user`,
+  parameters: z.object({}),
+  execute: async () => {
+    const session = await getSession();
+    const note = await db
+      .select()
+      .from(noteTable)
+      .where(
+        and(
+          eq(noteTable.userId, session.user.id),
+          eq(noteTable.isKnowledgeNote, true)
+        )
+      )
+      .limit(1);
+    return note[0]?.content;
+  },
+});
+
+export const appendToKnowledgeNote = tool({
+  description: `Add information to your knowledge base about the user`,
+  parameters: z.object({
+    info: z.string().describe("The information to add to the knowledge note"),
+  }),
+  execute: async ({ info }) => {
+    const session = await getSession();
+    try {
+      await db
+        .update(noteTable)
+        .set({
+          content: sql`COALESCE(${noteTable.content}, '') || ${info}`,
+        })
+        .where(
+          and(
+            eq(noteTable.userId, session.user.id),
+            eq(noteTable.isKnowledgeNote, true)
+          )
+        );
+    } catch (err) {
+      console.error("[TOOL]: appendToKnowledgeNote failed", err);
+      return false;
+    }
+    return true;
+  },
+});
