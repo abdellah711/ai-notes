@@ -2,6 +2,9 @@
 
 AI Notes App is a simple note-taking application that helps you organize your notes and find related insights or answers.
 
+![image](https://github.com/user-attachments/assets/33caf0c6-7b16-40c2-8534-0e53babc949b)
+
+
 ## Features
 
 - **AI Assistance**: Ask the AI any questions related to your notes and receive contextually relevant responses.
