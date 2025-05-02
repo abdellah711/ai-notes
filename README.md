@@ -2,6 +2,8 @@
 
 AI Notes App is a simple note-taking application that helps you organize your notes and find related insights or answers.
 
+![image](https://github.com/user-attachments/assets/33caf0c6-7b16-40c2-8534-0e53babc949b)
+
 ## Features
 
 - **AI Assistance**: Ask the AI any questions related to your notes and receive contextually relevant responses.
@@ -39,10 +41,9 @@ AI Notes App is a simple note-taking application that helps you organize your no
    Create a `.env` file in the root directory and add the necessary environment variables as specified in `.env.example`. Here's a brief explanation of each variable:
 
    - `GOOGLE_API_KEY`: Your API key for accessing Google services, used for AI capabilities.
-   - `DATABASE_URL`: Connection string for the database, used by Drizzle ORM to interact with your database.
-   - `NEXT_PUBLIC_API_URL`: The base URL for your API, used in client-side requests.
-   - `SESSION_SECRET`: A secret key for encrypting session data, essential for user authentication security.
-   - `NEXT_PUBLIC_ANALYTICS_ID`: An identifier for analytics services, used to track usage and performance metrics.
+   - `DATABASE_URL`: Connection string for you Postgres database, used by Drizzle ORM to interact with your database.
+   - `BETTER_AUTH_URL`: The base URL of your web application (e.g., http://localhost:3000 for local development or your production domain). This URL is required by better-auth for authentication callbacks and redirects.
+   - `BETTER_AUTH_SECRET`: A secret key used by better-auth for user authentication security.
 
 4. **Run the development server**:
 
