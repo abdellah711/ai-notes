@@ -7,7 +7,7 @@ import { createEmptyNote } from "@/db/actions";
 
 export const useCreateNote = () => {
   const router = useRouter();
-  const addNote = useNotesStore((state) => state.addNote);
+  const addNote = useNotesStore((state) => state.insertNote);
   const { isPending, mutate, ...rest } = useMutation({
     mutationFn: createEmptyNote,
     onSuccess: (data) => {
