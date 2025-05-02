@@ -45,7 +45,6 @@ AI Notes App is a simple note-taking application that helps you organize your no
    - `DATABASE_URL`: Connection string for the database, used by Drizzle ORM to interact with your database.
    - `NEXT_PUBLIC_API_URL`: The base URL for your API, used in client-side requests.
    - `SESSION_SECRET`: A secret key for encrypting session data, essential for user authentication security.
-   - `NEXT_PUBLIC_ANALYTICS_ID`: An identifier for analytics services, used to track usage and performance metrics.
 
 4. **Run the development server**:
 
